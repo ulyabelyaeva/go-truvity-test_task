@@ -40,8 +40,8 @@ func add_edge(u, v, c int) {
 
 func bfs() bool {
 	/*
-		breadth-first search: here we calculate the distances from s to all other vertices
-		 and build a residual graph
+		Breadth-first search: here we calculate the distances from s to all other vertices
+		and build a residual graph.
 	*/
 	queue := make([]int, 0)
 	queue = append(queue, s)
@@ -75,11 +75,12 @@ func dfs(u int, flow int) int {
 		return flow
 	}
 	// iterate over the adjacency list of vertex u, starting with the first edge that has not yet been removed
-	for ; pointer[u] < len(graph[u]); pointer[u]++ {
+	for pointer[u] < len(graph[u]) {
 		edge_id := graph[u][pointer[u]]
 		v := edges[edge_id].to
 		// check if the edge is part of the residual graph
 		if distance[v] != distance[u]+1 {
+			pointer[u] += 1
 			continue
 		}
 		// calculate the flow that can be added
@@ -93,11 +94,16 @@ func dfs(u int, flow int) int {
 			edges[edge_id^1].flow -= added_flow
 			return added_flow
 		}
+		pointer[u] += 1
 	}
 	return 0
 }
 
 func dinic() int {
+	/*
+		Dinic's algorithm: construct a residual network, find a blocking flow, repeat while
+		the blocking flow exists.
+	*/
 	flow := 0
 	// do algorithm's iterations until no blocking flow in the residual graph exists anymore
 	for true {
@@ -109,10 +115,10 @@ func dinic() int {
 			pointer[i] = 0
 		}
 		// find a blocking flow in the residual graph
-		pushed := dfs(s, INF)
-		for pushed != 0 {
-			flow += pushed
-			pushed = dfs(s, INF)
+		added_flow := dfs(s, INF)
+		for added_flow != 0 {
+			flow += added_flow
+			added_flow = dfs(s, INF)
 		}
 	}
 	return flow
@@ -120,7 +126,7 @@ func dinic() int {
 
 func input(filename string) {
 	/*
-		input graph data from input file
+		Input graph data from input file.
 	*/
 	f, err := os.Open(filename)
 	if err != nil {
@@ -140,6 +146,6 @@ func input(filename string) {
 }
 
 func main() {
-	input("testcases\\testcase11.txt")
+	input("example.txt")
 	fmt.Println(dinic())
 }
