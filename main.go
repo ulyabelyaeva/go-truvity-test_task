@@ -19,7 +19,7 @@ const MAXM = 300000 // maximum number of edges
 
 var n, m, s, t int              // number of vertices, number of edges, source and drain vertices
 var graph = make([][]int, MAXN) // in form of an adjacency list
-var distance [MAXN]int          // distances from s to all other vertices, required to build a residual graph
+var distance [MAXN]int          // distances from s to all other vertices, required to build a level graph
 var pointer [MAXN]int           // pointer to the first remaining edge in an adjacency list
 
 type edge struct {
@@ -41,7 +41,7 @@ func add_edge(u, v, c int) {
 func bfs() bool {
 	/*
 		Breadth-first search: here we calculate the distances from s to all other vertices
-		and build a residual graph.
+		and build a level graph.
 	*/
 	queue := make([]int, 0)
 	queue = append(queue, s)
@@ -68,7 +68,7 @@ func bfs() bool {
 
 func dfs(u int, flow int) int {
 	/*
-		Depth-first search: find a blocking flow in the residual graph and remove (by increasing pointer)
+		Depth-first search: find a blocking flow in the level graph and remove (by increasing pointer)
 		all edges that do not lead to t.
 	*/
 	if flow == 0 || u == t {
@@ -78,7 +78,7 @@ func dfs(u int, flow int) int {
 	for pointer[u] < len(graph[u]) {
 		edge_id := graph[u][pointer[u]]
 		v := edges[edge_id].to
-		// check if the edge is part of the residual graph
+		// check if the edge is part of the level graph
 		if distance[v] != distance[u]+1 {
 			pointer[u] += 1
 			continue
@@ -101,20 +101,20 @@ func dfs(u int, flow int) int {
 
 func dinic() int {
 	/*
-		Dinic's algorithm: construct a residual network, find a blocking flow, repeat while
+		Dinic's algorithm: construct a level graph, find a blocking flow, repeat while
 		the blocking flow exists.
 	*/
 	flow := 0
-	// do algorithm's iterations until no blocking flow in the residual graph exists anymore
+	// do algorithm's iterations until no blocking flow in the level graph exists anymore
 	for true {
-		// check if t is reachable from s, calculate distances from s to all other vertices and build a residual graph
+		// check if t is reachable from s, calculate distances from s to all other vertices and build a level graph
 		if !bfs() {
 			break
 		}
 		for i := 0; i < n; i++ {
 			pointer[i] = 0
 		}
-		// find a blocking flow in the residual graph
+		// find a blocking flow in the level graph
 		added_flow := dfs(s, INF)
 		for added_flow != 0 {
 			flow += added_flow
